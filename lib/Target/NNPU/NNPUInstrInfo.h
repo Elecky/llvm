@@ -1,0 +1,6 @@
+#ifndef LLVM_LIB_TARGET_NNPU_INSTR_INFO_H
+#define LLVM_LIB_TARGET_NNPU_INSTR_INFO_H
+
+
+
+#endif
