@@ -17,10 +17,17 @@ NNPUSubtarget::NNPUSubtarget(const Triple &TT, const std::string &CPU,
                 const std::string &FS, const TargetMachine &TM)
     :   NNPUGenSubtargetInfo(TT, CPU, FS), 
         TargetTriple(TT),
-        InstrInfo(*this), //TLInfo(TM, *this),
+        InstrInfo(initializeSubtargetDependencies(CPU, FS)),
+        TLInfo(TM, *this),
         FrameLowering(*this) 
 {}
 
 bool NNPUSubtarget::enableMachineScheduler() const {
-  return true;
+    return true;
+}
+
+NNPUSubtarget& NNPUSubtarget::initializeSubtargetDependencies(StringRef CPU, StringRef FS)
+{
+    ParseSubtargetFeatures(CPU, FS);
+    return *this;
 }

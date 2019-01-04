@@ -1,0 +1,54 @@
+//===-- NNPUMCTargetDesc.h - NNPU Target Descriptions ---------*- C++ -*-===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is distributed under the University of Illinois Open Source
+// License. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+//
+// This file provides NNPU specific target descriptions.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef LLVM_LIB_TARGET_NNPU_MCTARGETDESC_NNPUMCTARGETDESC_H
+#define LLVM_LIB_TARGET_NNPU_MCTARGETDESC_NNPUMCTARGETDESC_H
+
+#include "llvm/Support/DataTypes.h"
+
+#include <memory>
+
+namespace llvm {
+class MCAsmBackend;
+class MCCodeEmitter;
+class MCContext;
+class MCInstrInfo;
+class MCObjectTargetWriter;
+class MCRegisterInfo;
+class MCSubtargetInfo;
+class MCTargetOptions;
+class Target;
+class Triple;
+class StringRef;
+class raw_pwrite_stream;
+class raw_ostream;
+
+Target &getTheNNPUTarget();
+
+} // End llvm namespace
+
+// Defines symbolic names for NNPU registers.  This defines a mapping from
+// register name to register number.
+//
+#define GET_REGINFO_ENUM
+#include "NNPUGenRegisterInfo.inc"
+
+// Defines symbolic names for the NNPU instructions.
+//
+#define GET_INSTRINFO_ENUM
+#include "NNPUGenInstrInfo.inc"
+
+#define GET_SUBTARGETINFO_ENUM
+#include "NNPUGenSubtargetInfo.inc"
+
+#endif
