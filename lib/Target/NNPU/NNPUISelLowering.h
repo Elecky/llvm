@@ -37,6 +37,14 @@ public:
                         const SmallVectorImpl<ISD::OutputArg> &Outs,
                         const SmallVectorImpl<SDValue> &OutVals,
                         const SDLoc &dl, SelectionDAG &DAG) const override;
+    
+    EVT getSetCCResultType(const DataLayout &DL, LLVMContext &Context,
+                           EVT VT) const override
+    {
+        if (!VT.isVector())
+            return MVT::i32;
+        llvm_unreachable("vector type is not supported");
+    }
 
 private:
     SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;

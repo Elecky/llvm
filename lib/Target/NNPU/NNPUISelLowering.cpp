@@ -27,11 +27,29 @@ NNPUTargetLowering::NNPUTargetLowering(const TargetMachine &TM,
 {
     MVT PtrVT = MVT::getIntegerVT(8 * TM.getPointerSize(0));
 
+    // addRegisterClass(MVT::i1, &NNPU::Int32RegsRegClass);
     addRegisterClass(MVT::i32, &NNPU::Int32RegsRegClass);
 
     computeRegisterProperties(Subtarget->getRegisterInfo());
 
     setOperationAction(ISD::GlobalAddress, PtrVT, Custom);
+
+    //setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
+    //setOperationAction(ISD::SIGN_EXTEND, MVT::i1, Expand);
+    setOperationAction(ISD::SELECT_CC, MVT::i32, Expand);
+    //setOperationAction(ISD::SELECT, MVT::i32, Expand);
+    setOperationAction(ISD::BR_CC, MVT::i32, Expand);
+
+    // the SDOps which needs promote. 
+    static const decltype(ISD::ADD) promoteSDs[] = 
+        { ISD::ADD, ISD::SUB, ISD::MUL, ISD::UDIV, ISD::UREM, 
+          ISD::AND, ISD::OR, ISD::XOR, ISD::SETCC };
+    for (auto op : promoteSDs)
+    {
+        setOperationAction(op, MVT::i1, LegalizeAction::Promote);
+    }
+
+    setBooleanContents(BooleanContent::ZeroOrOneBooleanContent);
 }
 
 SDValue NNPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const

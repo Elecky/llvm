@@ -52,18 +52,21 @@ public:
     //unsigned isStoreToStackSlot(const MachineInstr &MI,
     //                            int &FrameIndex) const override;
 
-    //bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+    // bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
     //                    MachineBasicBlock *&FBB,
     //                    SmallVectorImpl<MachineOperand> &Cond,
-    //                    bool AllowModify = false) const override;
+    //                    bool AllowModify = false) const override
+    // {
+    //     return true;  // not branch analysis
+    // }
 
     //unsigned removeBranch(MachineBasicBlock &MBB,
     //                        int *BytesRemoved = nullptr) const override;
 
-    //unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
-    //                        MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
-    //                        const DebugLoc &DL,
-    //                        int *BytesAdded = nullptr) const override;
+    unsigned insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                           MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
+                           const DebugLoc &DL,
+                           int *BytesAdded = nullptr) const override;
 
     // bool
     // reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;

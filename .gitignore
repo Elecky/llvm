@@ -24,6 +24,7 @@
 # Nested build directory
 /build
 /release_build
+/opt_build
 
 #==============================================================================#
 # Explicit files to ignore (only matches one).

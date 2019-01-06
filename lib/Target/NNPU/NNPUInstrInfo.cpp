@@ -66,3 +66,24 @@ loadRegFromStackSlot(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
     else
         llvm_unreachable("Can't load this register from stack slot");
 }
+
+unsigned NNPUInstrInfo::
+    insertBranch(MachineBasicBlock &MBB, MachineBasicBlock *TBB,
+                 MachineBasicBlock *FBB, ArrayRef<MachineOperand> Cond,
+                 const DebugLoc &DL,
+                 int *BytesAdded) const
+{
+    assert(TBB && "insertBranch must not be told to insert a fallthrough");
+    assert(Cond.size() == 0 &&
+           "NNPUInstrInfo::insertBranch only handles tail merging, "
+           "it inserts only unconditional branch");
+    assert(!BytesAdded && "code size not handled");
+
+    if (Cond.empty()) {
+        assert(!FBB && "Unconditional branch with multiple successors!");
+        BuildMI(&MBB, DL, get(NNPU::Jump)).addMBB(TBB);
+        return 1;
+    }
+
+    llvm_unreachable("conditional branch insert is not handled");
+}

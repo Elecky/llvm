@@ -23,7 +23,7 @@ class FRR<SDNode OpNode, string OpStr>:
              [(set i32:$Rd, (OpNode i32:$Rs, i32:$Rt))]>
 {}
 
-class FRR_Frag<PatFrag OpFrag, string OpStr>:
+class FSetRR<PatFrag OpFrag, string OpStr>:
     NNPUInst<(outs Int32Regs:$Rd), (ins Int32Regs:$Rs, Int32Regs:$Rt),
              !strconcat(OpStr, " $Rd, $Rs, $Rt"),
              [(set i32:$Rd, (OpFrag i32:$Rs, i32:$Rt))]>
@@ -35,7 +35,7 @@ class FRI<SDNode OpNode, string OpStr>:
              [(set i32:$Rd, (OpNode i32:$Rs, imm:$imm))]>
 {}
 
-class FRI_Frag<PatFrag OpFrag, string OpStr>:
+class FSetRI<PatFrag OpFrag, string OpStr>:
     NNPUInst<(outs Int32Regs:$Rd), (ins Int32Regs:$Rs, i32imm:$imm),
              !strconcat(OpStr, " $Rd, $Rs, $imm"),
              [(set i32:$Rd, (OpFrag i32:$Rs, imm:$imm))]>
