@@ -23,20 +23,9 @@ def XORI: FRI<xor, "XORI">;
 def AndI: FRI<and, "AndI">;
 def OrI: FRI<or, "OrI">;
 
-def MEMri : Operand<iPTR> {
-  let PrintMethod = "printMemOperand";
-  let MIOperandInfo = (ops ptr_rc, i32imm);  
-  // ptr_rc is resolved dynamically via a callback to TargetInstrInfo.
-}
-
-// TODO: implement this SelectADDRri method, but at where?
-def ADDRri : ComplexPattern<iPTR, 2, "SelectADDRri", [add, frameindex], []>;
-
 // some user-defined SDNodes.
 def NNPURet : SDNode<"NNPUISD::Ret", SDTNone,
                      [SDNPHasChain, SDNPOptInGlue]>;
-
-def NNPUMOAbsAll : SDNode<"NNPUISD::MO_ABS_ALL", SDTIntUnaryOp>;
 
 // immediates.
 def : Pat<(i32 imm:$val),
@@ -76,6 +65,16 @@ def : Pat<(i32 (setuge i32:$Rs, imm:$val)),
 // def : Pat<(), 
 //           ()>;
 
+// load and store
+def MEMri : Operand<iPTR> {
+  let PrintMethod = "printMemOperand";
+  let MIOperandInfo = (ops ptr_rc, i32imm);  
+  // ptr_rc is resolved dynamically via a callback to TargetInstrInfo.
+}
+
+// SelectADDRri method is implemented in NNPU's SelectionDAGISel derivate class
+def ADDRri : ComplexPattern<iPTR, 2, "SelectADDRri", [add, frameindex], []>;
+
 def Load : NNPUInst<(outs Int32Regs:$Rd), (ins MEMri:$addr),
                     "Load $Rd, $addr",
                     [(set i32:$Rd, (load ADDRri:$addr))]>
@@ -90,6 +89,11 @@ def Store : NNPUInst<(outs), (ins MEMri:$addr, Int32Regs:$Rt),
     let mayStore = 1;
 }
 
+// store zero
+def : Pat<(store (i32 0), ADDRri:$addr), 
+          (Store ADDRri:$addr, Zero)>;
+
+// jump and branch
 def brtarget : Operand<OtherVT>;
 
 def Jump : NNPUInst<(outs), (ins brtarget:$target),
@@ -144,3 +148,5 @@ def RetRA: NNPUInst<(outs), (ins),
 //     let hasCtrlDep = 1;
 // }
 /**/
+
+include "NNPUTensorInstrInfo.td"

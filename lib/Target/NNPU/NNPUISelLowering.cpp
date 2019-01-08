@@ -34,12 +34,16 @@ NNPUTargetLowering::NNPUTargetLowering(const TargetMachine &TM,
 
     setOperationAction(ISD::GlobalAddress, PtrVT, Custom);
 
+    // intrinsic handling
+    // setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
+
     //setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
     //setOperationAction(ISD::SIGN_EXTEND, MVT::i1, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::i32, Expand);
     //setOperationAction(ISD::SELECT, MVT::i32, Expand);
     setOperationAction(ISD::BR_CC, MVT::i32, Expand);
 
+    // define promotes.
     // the SDOps which needs promote. 
     static const decltype(ISD::ADD) promoteSDs[] = 
         { ISD::ADD, ISD::SUB, ISD::MUL, ISD::UDIV, ISD::UREM, 
@@ -49,6 +53,7 @@ NNPUTargetLowering::NNPUTargetLowering(const TargetMachine &TM,
         setOperationAction(op, MVT::i1, LegalizeAction::Promote);
     }
 
+    // set boolean content.
     setBooleanContents(BooleanContent::ZeroOrOneBooleanContent);
 }
 
@@ -58,6 +63,9 @@ SDValue NNPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
     {
     case ISD::GlobalAddress:
         return lowerGlobalAddress(Op, DAG);
+
+    case ISD::INTRINSIC_VOID:
+        return lowerIntrinsic_Void(Op, DAG);
 
     default: 
         llvm_unreachable("unhandled op code in lower operation");
@@ -107,9 +115,22 @@ SDValue NNPUTargetLowering::lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) co
     GlobalAddressSDNode *N = cast<GlobalAddressSDNode>(Op);
     const GlobalValue *GV = N->getGlobal();
 
-    SDValue addr = DAG.getTargetGlobalAddress(GV, DL, Ty, 0, NNPUISD::MO_ABS_ALL);
+    SDValue addr = DAG.getTargetGlobalAddress(GV, DL, Ty, 0, 0);
     SDValue zero = DAG.getRegister(NNPU::Zero, MVT::i32);// DAG.getTargetConstant(0, DL, Ty);
     return DAG.getNode(ISD::ADD, DL, Ty, zero, addr);
+}
+
+SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) const
+{
+    SDValue inChain = Op.getOperand(0);
+    unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
+    SDLoc dl(Op);
+
+    switch (IntNo) 
+    {
+    default: return SDValue();    // Don't custom lower most intrinsics.
+    
+    }
 }
 
 }  // end namespace llvm

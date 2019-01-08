@@ -11,8 +11,7 @@ namespace NNPUISD {
 
 enum NodeType : unsigned {
     FIRST_NUMBER = ISD::BUILTIN_OP_END,
-    Ret,
-    MO_ABS_ALL
+    Ret
 };
 
 }  // end namespace NNPUISD
@@ -48,6 +47,8 @@ public:
 
 private:
     SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
+
+    SDValue lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) const;
 };
 
 } // end namespace llvm
