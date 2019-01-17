@@ -18,7 +18,10 @@ namespace llvm
 static Reloc::Model getEffectiveRelocModel(Optional<Reloc::Model> RM) {
     if (!RM.hasValue())
         return Reloc::Static;
-    return *RM;
+    if (RM.getValue() != Reloc::Static){
+        llvm_unreachable("target NNPU only supported Static relocation-model");
+    }
+    return Reloc::Static;
 }
 
 static CodeModel::Model getEffectiveCodeModel(Optional<CodeModel::Model> CM,
