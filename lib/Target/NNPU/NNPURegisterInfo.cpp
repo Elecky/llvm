@@ -81,7 +81,7 @@ void NNPURegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
     DebugLoc dl = MI.getDebugLoc();
     int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
     MachineFunction &MF = *MI.getParent()->getParent();
-    const NNPUSubtarget &Subtarget = MF.getSubtarget<NNPUSubtarget>();
+    // const NNPUSubtarget &Subtarget = MF.getSubtarget<NNPUSubtarget>();
 
     unsigned FrameReg = NNPU::FP;
     int Offset;

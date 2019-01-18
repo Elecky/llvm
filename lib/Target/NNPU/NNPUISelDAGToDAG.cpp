@@ -87,7 +87,7 @@ bool NNPUDAGToDAGISel::SelectADDRri(SDValue Addr, SDValue &Base, SDValue &Offset
                                             MVT::i32);
             return true;
         }
-        if (GlobalAddressSDNode *GN = dyn_cast<GlobalAddressSDNode>(Addr.getOperand(1))) {
+        if (dyn_cast<GlobalAddressSDNode>(Addr.getOperand(1))) {
             Base = Addr.getOperand(0);
             Offset = Addr.getOperand(1);
             return true;
@@ -120,12 +120,6 @@ void NNPUDAGToDAGISel::Select(SDNode *Node)
         return;
     }
 
-    switch (opCode)
-    {
-    default:    
-        break;
-    }
-
     SelectCode(Node);
 }
 
@@ -134,7 +128,7 @@ bool NNPUDAGToDAGISel::trySelect(SDNode *Node)
     unsigned opCode = Node->getOpcode();
     SDLoc DL(Node);
 
-    EVT NodeTy = Node->getValueType(0);
+    // EVT NodeTy = Node->getValueType(0);
 
     switch (opCode)
     {

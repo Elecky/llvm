@@ -40,15 +40,15 @@ NNPUFrameLowering::NNPUFrameLowering(const NNPUSubtarget &ST)
 
 void NNPUFrameLowering::emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB) const
 {
-    NNPUMachineFunctionInfo *FuncInfo = MF.getInfo<NNPUMachineFunctionInfo>();
+    // NNPUMachineFunctionInfo *FuncInfo = MF.getInfo<NNPUMachineFunctionInfo>();
 
     assert(&MF.front() == &MBB && "Shrink-wrapping not yet supported");
     MachineFrameInfo &MFI = MF.getFrameInfo();
     const NNPUSubtarget &Subtarget = MF.getSubtarget<NNPUSubtarget>();
     const NNPUInstrInfo &TII =
         *static_cast<const NNPUInstrInfo *>(Subtarget.getInstrInfo());
-    const NNPURegisterInfo &RegInfo =
-        *static_cast<const NNPURegisterInfo *>(Subtarget.getRegisterInfo());
+    // const NNPURegisterInfo &RegInfo =
+    //     *static_cast<const NNPURegisterInfo *>(Subtarget.getRegisterInfo());
     MachineBasicBlock::iterator MBBI = MBB.begin();
     // Debug location must be unknown since the first debug location is used
     // to determine the end of the prologue.
@@ -67,7 +67,7 @@ void NNPUFrameLowering::emitPrologue(MachineFunction &MF, MachineBasicBlock &MBB
 
 void NNPUFrameLowering::emitEpilogue(MachineFunction &MF, MachineBasicBlock &MBB) const
 {
-    NNPUMachineFunctionInfo *FuncInfo = MF.getInfo<NNPUMachineFunctionInfo>();
+    // NNPUMachineFunctionInfo *FuncInfo = MF.getInfo<NNPUMachineFunctionInfo>();
     MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
     const NNPUInstrInfo &TII =
         *static_cast<const NNPUInstrInfo *>(MF.getSubtarget().getInstrInfo());

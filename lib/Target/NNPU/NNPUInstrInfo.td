@@ -7,6 +7,7 @@ def MulU: FRR<mul, "MulU">;
 def DivU: FRR<udiv, "DivU">;
 def ModU: FRR<urem, "ModU">;
 def SLTU: FSetRR<setult, "SLTU">;
+def SLT: FSetRR<setlt, "SLT">;
 def SEQ: FSetRR<seteq, "SEQ">;
 def XOR: FRR<xor, "XOR">;
 def And: FRR<and, "And">;
@@ -18,10 +19,12 @@ def MulIU: FRI<mul, "MulIU">;
 def DivIU: FRI<udiv, "DivIU">;
 def ModIU: FRI<urem, "ModIU">;
 def SLTIU: FSetRI<setult, "SLTIU">;
+def SLTI: FSetRI<setlt, "SLTI">;
 def SEQI: FSetRI<seteq, "SEQI">;
 def XORI: FRI<xor, "XORI">;
 def AndI: FRI<and, "AndI">;
 def OrI: FRI<or, "OrI">;
+def SHL: FRI<shl, "SHL">;
 
 // some user-defined SDNodes.
 def NNPURet : SDNode<"NNPUISD::Ret", SDTNone,
@@ -51,16 +54,24 @@ def : Pat<(i32 (setne i32:$Rs, imm:$val)),
 // greater than: a > b -> b < a
 def : Pat<(i32 (setugt i32:$Rs, i32:$Rt)),
           (SLTU $Rt, $Rs)>;
+def : Pat<(i32 (setgt i32:$Rs, i32:$Rt)),
+          (SLT $Rt, $Rs)>;
 
 // less than or equal: a <= b -> (b < a) ^ 1
 def : Pat<(i32 (setule i32:$Rs, i32:$Rt)),
           (XORI (SLTU $Rt, $Rs), 1)>;
+def : Pat<(i32 (setle i32:$Rs, i32:$Rt)),
+          (XORI (SLT $Rt, $Rs), 1)>;
 
 // greater than or equal: a >= b -> (a < b) ^ 1
 def : Pat<(i32 (setuge i32:$Rs, i32:$Rt)), 
           (XORI (SLTU $Rs, $Rt), 1)>;
 def : Pat<(i32 (setuge i32:$Rs, imm:$val)), 
           (XORI (SLTIU $Rs, imm:$val), 1)>;
+def : Pat<(i32 (setge i32:$Rs, i32:$Rt)), 
+          (XORI (SLT $Rs, $Rt), 1)>;
+def : Pat<(i32 (setge i32:$Rs, imm:$val)), 
+          (XORI (SLTI $Rs, imm:$val), 1)>;
 
 // def : Pat<(), 
 //           ()>;

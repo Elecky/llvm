@@ -94,6 +94,51 @@ SDValue
                             const SDLoc &dl, SelectionDAG &DAG,
                             SmallVectorImpl<SDValue> &InVals) const
 {
+    MachineFunction &MF = DAG.getMachineFunction();
+    // MachineRegisterInfo &RegInfo = MF.getRegInfo();
+    // NNPUMachineFunctionInfo *FuncInfo = MF.getInfo<NNPUMachineFunctionInfo>();
+
+    // Assign locations to all of the incoming arguments.
+    SmallVector<CCValAssign, 16> ArgLocs;
+    CCState CCInfo(CallConv, isVarArg, DAG.getMachineFunction(), ArgLocs,
+                    *DAG.getContext());
+    CCInfo.AnalyzeFormalArguments(Ins, CC_NNPU);
+
+    const unsigned StackOffset = 0;  // what's this??
+
+    unsigned InIdx = 0;
+    for (unsigned i = 0, e = ArgLocs.size(); i != e; ++i, ++InIdx) {
+        CCValAssign &VA = ArgLocs[i];
+
+        if (Ins[InIdx].Flags.isSRet()) {
+            llvm_unreachable("NNPUTargetLowering didn't handle SRet");
+        }
+
+        assert(VA.isMemLoc() && 
+                ", NNPUTargetLowering didn't handle pass argument by register");
+        
+        unsigned Offset = VA.getLocMemOffset()+StackOffset;
+        auto PtrVT = getPointerTy(DAG.getDataLayout());
+        assert(!VA.needsCustom() && 
+                ", NNPUTargetLowering didn't handle argument lowering that needs custom");
+        
+        int FI = MF.getFrameInfo().CreateFixedObject(4,
+                                                    Offset,
+                                                    true);
+        SDValue FIPtr = DAG.getFrameIndex(FI, PtrVT);
+        SDValue Load ;
+        if (VA.getValVT() == MVT::i32) {
+            Load = DAG.getLoad(VA.getValVT(), dl, Chain, FIPtr, MachinePointerInfo());
+        } else {
+            // We shouldn't see any other value types here.
+            llvm_unreachable("Unexpected ValVT encountered in frame lowering.");
+        }
+        InVals.push_back(Load);
+    }
+
+    assert(!MF.getFunction().hasStructRetAttr() && 
+            ", NNPU target has no struct support");
+    assert(!isVarArg && ", NNPU target has no VarArg support");
     return Chain;
 }
 
@@ -122,7 +167,7 @@ SDValue NNPUTargetLowering::lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) co
 
 SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) const
 {
-    SDValue inChain = Op.getOperand(0);
+    // SDValue inChain = Op.getOperand(0);
     unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
     SDLoc dl(Op);
 

@@ -1,6 +1,6 @@
 def CC_NNPU : CallingConv<[
   // NNPU has no function call actually, 
-  // so we just pretend parameter should be placed on stack.
+  // this is only used to pass parameters to the 'main' function.
   CCAssignToStack<4, 4>
 ]>;
 
