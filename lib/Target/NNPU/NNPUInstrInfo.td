@@ -24,7 +24,7 @@ def SEQI: FSetRI<seteq, "SEQI">;
 def XORI: FRI<xor, "XORI">;
 def AndI: FRI<and, "AndI">;
 def OrI: FRI<or, "OrI">;
-def SHL: FRI<shl, "SHL">;
+def SHLI: FRI<shl, "SHLI">;
 
 // some user-defined SDNodes.
 def NNPURet : SDNode<"NNPUISD::Ret", SDTNone,
