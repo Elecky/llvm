@@ -30,6 +30,7 @@ def ScratchpadStore : NNPUTensorInst<
                 "ScratchpadStore $dramAddr, $bufAddr, $size",
                 [(int_NNPU_ScratchpadStore i32:$dramAddr, i32:$bufAddr, i32:$size)]>;
 
+// vector binary insns.
 class NNPUVctrBinary<string instrAsm, Intrinsic intrin> : 
                 NNPUTensorInst<
                     (ins Int32Regs:$outAddr, Int32Regs:$in1Addr, Int32Regs:$in2Addr,
@@ -40,5 +41,100 @@ class NNPUVctrBinary<string instrAsm, Intrinsic intrin> :
                     >;
 
 def VAddV : NNPUVctrBinary<"VAddV", int_NNPU_VAddV>;
+def VSubV : NNPUVctrBinary<"VSubV", int_NNPU_VSubV>;
 def VMulV : NNPUVctrBinary<"VMulV", int_NNPU_VMulV>;
+def VDivV : NNPUVctrBinary<"VDivV", int_NNPU_VDivV>;
 def VGTMV : NNPUVctrBinary<"VGTMV", int_NNPU_VGTMV>;
+
+// vector unary insns.
+class NNPUVctrUnary<string instrAsm, Intrinsic intrin> : 
+                NNPUTensorInst<
+                    (ins Int32Regs:$outAddr, Int32Regs:$inAddr,
+                         i32imm:$size, i32imm:$mode),
+                    !strconcat(instrAsm, ".$size.$mode $outAddr, $inAddr"),
+                    [(intrin i32:$outAddr, i32:$inAddr,
+                             imm:$size, imm:$mode)]
+                    >;
+
+def VExp : NNPUVctrUnary<"VExp", int_NNPU_VExp>;
+def VLog : NNPUVctrUnary<"VLog", int_NNPU_VLog>;
+
+// vector-immediate insns.
+class NNPUVctrImm<string instrAsm, Intrinsic intrin> : 
+                NNPUTensorInst<
+                    (ins Int32Regs:$outAddr, Int32Regs:$inAddr, f64imm:$immVal,
+                         i32imm:$size, i32imm:$mode),
+                    !strconcat(instrAsm, ".$size.$mode $outAddr, $inAddr, $immVal"),
+                    [(intrin i32:$outAddr, i32:$inAddr, fpimm:$immVal,
+                             imm:$size, imm:$mode)]
+                    >;
+
+def VAddI : NNPUVctrImm<"VAddI", int_NNPU_VAddI>;
+def VSubI : NNPUVctrImm<"VSubI", int_NNPU_VSubI>;
+def VMulI : NNPUVctrImm<"VMulI", int_NNPU_VMulI>;
+def VDivI : NNPUVctrImm<"VDivI", int_NNPU_VDivI>;
+def VGTMI : NNPUVctrImm<"VGTMI", int_NNPU_VGTMI>;
+def ISubV : NNPUVctrImm<"ISubV", int_NNPU_ISubV>;
+def IDivV : NNPUVctrImm<"IDivV", int_NNPU_IDivV>;
+
+// GEMM insn.
+def GEMM : NNPUTensorInst<
+               (ins i32imm:$nRow, i32imm:$factor, i32imm:$nCol,
+                    Int32Regs:$outAddr, Int32Regs:$outStride,
+                    Int32Regs:$in1Addr, Int32Regs:$in1Stride,
+                    Int32Regs:$in2Addr, Int32Regs:$in2Stride,
+                    i32imm:$mode, i1imm:$toAcc, i1imm:$doAcc),
+               "GEMM.$nRow.$factor.$nCol.$mode.$toAcc.$doAcc $outAddr, $outStride, $in1Addr, $in1Stride, $in2Addr, $in2Stride",
+               [(int_NNPU_GEMM 
+                    imm:$nRow, imm:$factor, imm:$nCol,
+                    i32:$outAddr, i32:$outStride,
+                    i32:$in1Addr, i32:$in1Stride,
+                    i32:$in2Addr, i32:$in2Stride,
+                    imm:$mode, imm:$toAcc, imm:$doAcc)]>;
+
+// matrix-immediate insns.
+class NNPUMatImm<string instrAsm, Intrinsic intrin> : 
+                NNPUTensorInst<
+                    (ins Int32Regs:$outAddr, Int32Regs:$inAddr, f64imm:$immVal,
+                         i32imm:$nRow, i32imm:$nCol i32imm:$mode),
+                    !strconcat(instrAsm, ".$nRow.$nCol.$mode $outAddr, $inAddr, $immVal"),
+                    [(intrin i32:$outAddr, i32:$inAddr, fpimm:$immVal,
+                             imm:$nRow, imm:$nCol, imm:$mode)]
+                    >;
+
+def MAddI : NNPUMatImm<"MAddI", int_NNPU_MAddI>;
+def MMulI : NNPUMatImm<"MMulI", int_NNPU_MMulI>;
+def ISubM : NNPUMatImm<"ISubM", int_NNPU_ISubM>;
+
+// scratchpad copy
+def ScratchpadCopy : 
+          NNPUTensorInst<
+               (ins Int32Regs:$dstAddr, Int32Regs:$dstStride,
+                    Int32Regs:$srcAddr, Int32Regs:$srcStride,
+                    i32imm:$unitBytes, Int32Regs:$nUnit),
+               "ScratchpadCopy.$unitBytes $dstAddr, $dstStride, $srcAddr, $srcStride, $nUnit",
+               [(int_NNPU_ScratchpadCopy 
+                    i32:$dstAddr, i32:$dstStride,
+                    i32:$srcAddr, i32:$srcStride,
+                    imm:$unitBytes, i32:$nUnit)]>;
+
+def CopyAccToBuffer : 
+          NNPUTensorInst<
+               (ins Int32Regs:$dstAddr, Int32Regs:$dstStride,
+                    Int32Regs:$srcAddr, Int32Regs:$srcStride,
+                    i32imm:$unitBytes, Int32Regs:$nUnit),
+               "CopyAccToBuffer.$unitBytes $dstAddr, $dstStride, $srcAddr, $srcStride, $nUnit",
+               [(int_NNPU_CopyAccToBuffer 
+                    i32:$dstAddr, i32:$dstStride,
+                    i32:$srcAddr, i32:$srcStride,
+                    imm:$unitBytes, i32:$nUnit)]>;
+
+def Memset :
+          NNPUTensorInst<
+               (ins Int32Regs:$addr, Int32Regs:$nUnit, Int32Regs:$stride,
+                    f64imm:$val, i32imm:$mode),
+               "Memset.$mode $addr, $nUnit, $stride, $val",
+               [(int_NNPU_Memset 
+                    i32:$addr, i32:$nUnit, i32:$stride,
+                    fpimm:$val, imm:$mode)]
+          >;

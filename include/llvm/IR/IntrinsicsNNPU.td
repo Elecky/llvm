@@ -34,14 +34,62 @@ class int_NNPU_void_5op<string name> :
             int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty],
                           name>;
 
+class int_NNPU_void_6op<string name> :
+            int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, 
+                           llvm_i32_ty, llvm_i32_ty, llvm_i32_ty],
+                          name>;
+}
+
 def int_NNPU_DMALoad : int_NNPU_void_4op<"DMALoad">;
 def int_NNPU_DMAStore : int_NNPU_void_4op<"DMAStore">;
 
 def int_NNPU_ScratchpadLoad : int_NNPU_void_3op<"ScratchpadLoad">;
 def int_NNPU_ScratchpadStore : int_NNPU_void_3op<"ScratchpadStore">;
 
+// vector binary intrinsics.
 def int_NNPU_VAddV : int_NNPU_void_5op<"VAddV">;
+def int_NNPU_VSubV : int_NNPU_void_5op<"VSubV">;
 def int_NNPU_VMulV : int_NNPU_void_5op<"VMulV">;
 def int_NNPU_VGTMV : int_NNPU_void_5op<"VGTMV">;
+def int_NNPU_VDivV : int_NNPU_void_5op<"VDivV">;
 
+// vector unary intrinsics.
+def int_NNPU_VExp : int_NNPU_void_4op<"VExp">;
+def int_NNPU_VLog : int_NNPU_void_4op<"VLog">;
+
+// vector-imm intrinsics
+let ParamTypes = [llvm_i32_ty, llvm_i32_ty, llvm_double_ty, llvm_i32_ty, llvm_i32_ty] in
+{
+    def int_NNPU_VAddI : int_NNPU_void<[], "VAddI">;
+    def int_NNPU_VSubI : int_NNPU_void<[], "VSubI">;
+    def int_NNPU_VMulI : int_NNPU_void<[], "VMulI">;
+    def int_NNPU_VDivI : int_NNPU_void<[], "VDivI">;
+    def int_NNPU_VGTMI : int_NNPU_void<[], "VGTMI">;
+    def int_NNPU_ISubV : int_NNPU_void<[], "ISubV">;
+    def int_NNPU_IDivV : int_NNPU_void<[], "IDivV">;
 }
+
+// GEMM intrinsic
+def int_NNPU_GEMM : int_NNPU_void<
+        [llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, 
+         llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, 
+         llvm_i1_ty, llvm_i1_ty], "GEMM">;
+
+
+let ParamTypes = [llvm_i32_ty, llvm_i32_ty, llvm_double_ty, llvm_i32_ty, 
+                    llvm_i32_ty, llvm_i32_ty] in 
+{
+    def int_NNPU_MAddI : int_NNPU_void<[], "MAddI">;
+    def int_NNPU_MMulI : int_NNPU_void<[], "MMulI">;
+    def int_NNPU_ISubM : int_NNPU_void<[], "ISubM">;
+}
+
+// ScratchpadCopy
+def int_NNPU_ScratchpadCopy : int_NNPU_void_6op<"ScratchpadCopy">;
+// CopyAccToBuffer
+def int_NNPU_CopyAccToBuffer : int_NNPU_void_6op<"CopyAccToBuffer">;
+
+// memset.
+def int_NNPU_Memset : 
+        int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_double_ty, llvm_i32_ty], 
+        "Memset">;
