@@ -39,7 +39,7 @@ def : Pat<(i32 imm:$val),
 def : Pat<(i32 (sext i1:$val)),
           (AddIU $val, -1)>;
 
-// sign extend
+// sign extend 
 def : Pat<(i32 (select i32:$cond, -1, 0)),
           (AddIU (XORI $cond, 1), -1)>;
 

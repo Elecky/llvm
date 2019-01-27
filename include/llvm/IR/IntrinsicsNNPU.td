@@ -93,3 +93,56 @@ def int_NNPU_CopyAccToBuffer : int_NNPU_void_6op<"CopyAccToBuffer">;
 def int_NNPU_Memset : 
         int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_double_ty, llvm_i32_ty], 
         "Memset">;
+
+// vector dor product.
+def int_NNPU_VDotV : int_NNPU_void_5op<"VDotV">;
+
+// vector reduce
+def int_NNPU_VReduceSum : int_NNPU_void_4op<"VReduceSum">;
+def int_NNPU_VReduceMax : int_NNPU_void_4op<"VReduceMax">;
+def int_NNPU_VReduceMin : int_NNPU_void_4op<"VReduceMin">;
+
+// matrix binary
+let ParamTypes = [llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty,
+                    llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty] in 
+{
+    def int_NNPU_MAddM : int_NNPU_void<[], "MAddM">;
+    def int_NNPU_MSubM : int_NNPU_void<[], "MSubM">;
+    def int_NNPU_MMulM : int_NNPU_void<[], "MMulM">;
+}
+
+// matrix reduce.
+let ParamTypes = [llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty,
+                  llvm_i32_ty, llvm_i1_ty, llvm_i1_ty] in 
+{
+    def int_NNPU_MReduceSumRow : int_NNPU_void<[], "MReduceSumRow">;
+}
+
+// matrix-vector.
+let ParamTypes = [llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty,
+                  llvm_i32_ty, llvm_i32_ty, llvm_i32_ty] in 
+{
+    def int_NNPU_MAddV : int_NNPU_void<[], "MAddV">;
+    def int_NNPU_MSubV : int_NNPU_void<[], "MSubV">;
+    def int_NNPU_MMulV : int_NNPU_void<[], "MMulV">;
+}
+
+// matrix row dot
+def int_NNPU_MRowDot : 
+    int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty,
+                   llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i1_ty, llvm_i1_ty],
+                  "MRowDot">;
+
+def int_NNPU_AccMemset :
+    int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, 
+                   llvm_double_ty, llvm_i32_ty],
+                  "AccMemset">;
+
+// vector-scalar 
+def int_NNPU_VAddS : int_NNPU_void_5op<"VAddS">;
+def int_NNPU_VSubS : int_NNPU_void_5op<"VSubS">;
+def int_NNPU_VMulS : int_NNPU_void_5op<"VMulS">;
+def int_NNPU_VDivS : int_NNPU_void_5op<"VDivS">;
+def int_NNPU_VGTMS : int_NNPU_void_5op<"VGTMS">;
+def int_NNPU_SSubV : int_NNPU_void_5op<"SSubV">;
+def int_NNPU_SDivV : int_NNPU_void_5op<"SDivV">;

@@ -37,8 +37,6 @@ NNPUTargetLowering::NNPUTargetLowering(const TargetMachine &TM,
     // intrinsic handling
     // setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 
-    //setOperationAction(ISD::SIGN_EXTEND_INREG, MVT::i1, Expand);
-    //setOperationAction(ISD::SIGN_EXTEND, MVT::i1, Expand);
     setOperationAction(ISD::SELECT_CC, MVT::i32, Expand);
     //setOperationAction(ISD::SELECT, MVT::i32, Expand);
     setOperationAction(ISD::BR_CC, MVT::i32, Expand);
@@ -173,6 +171,7 @@ SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) c
 
     switch (IntNo) 
     {
+    
     default: return SDValue();    // Don't custom lower most intrinsics.
     
     }

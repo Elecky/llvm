@@ -96,7 +96,7 @@ def GEMM : NNPUTensorInst<
 class NNPUMatImm<string instrAsm, Intrinsic intrin> : 
                 NNPUTensorInst<
                     (ins Int32Regs:$outAddr, Int32Regs:$inAddr, f64imm:$immVal,
-                         i32imm:$nRow, i32imm:$nCol i32imm:$mode),
+                         i32imm:$nRow, i32imm:$nCol, i32imm:$mode),
                     !strconcat(instrAsm, ".$nRow.$nCol.$mode $outAddr, $inAddr, $immVal"),
                     [(intrin i32:$outAddr, i32:$inAddr, fpimm:$immVal,
                              imm:$nRow, imm:$nCol, imm:$mode)]
@@ -138,3 +138,123 @@ def Memset :
                     i32:$addr, i32:$nUnit, i32:$stride,
                     fpimm:$val, imm:$mode)]
           >;
+
+// vector dot product
+def VDotV :
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr, Int32Regs:$in1Addr, Int32Regs:$in2Addr,
+                    i32imm:$size, i32imm:$mode),
+               "VDotV.$size.$mode $outAddr, $in1Addr, $in2Addr",
+               [(int_NNPU_VDotV
+                    i32:$outAddr, i32:$in1Addr, i32:$in2Addr,
+                    imm:$size, imm:$mode)]
+          >;
+
+// vector reduce
+class NNPUVctrReduce<string instrAsm, Intrinsic intrin> :
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr, Int32Regs:$inAddr,
+                    i32imm:$size, i32imm:$mode),
+               !strconcat(instrAsm, ".$size.$mode $outAddr, $inAddr"),
+               [(intrin i32:$outAddr, i32:$inAddr, imm:$size, imm:$mode)]
+          >;
+
+def VReduceSum : NNPUVctrReduce<"VReduceSum", int_NNPU_VReduceSum>;
+def VReduceMax : NNPUVctrReduce<"VReduceMax", int_NNPU_VReduceMax>;
+def VReduceMin : NNPUVctrReduce<"VReduceMin", int_NNPU_VReduceMin>;
+
+// matrix binary
+class NNPUMatBinary<string instrAsm, Intrinsic intrin> :
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr, Int32Regs:$outStride,
+                    Int32Regs:$in1Addr, Int32Regs:$in1Stride,
+                    Int32Regs:$in2Addr, Int32Regs:$in2Stride,
+                    i32imm:$nRow, i32imm:$nCol, i32imm:$mode),
+               !strconcat(instrAsm, ".$nRow.$nCol.$mode $outAddr, $outStride, $in1Addr, $in1Stride, $in2Addr, $in2Stride"),
+               [(intrin 
+                    i32:$outAddr, i32:$outStride,
+                    i32:$in1Addr, i32:$in1Stride,
+                    i32:$in2Addr, i32:$in2Stride,
+                    imm:$nRow, imm:$nCol, imm:$mode)]
+          >;
+
+def MAddM : NNPUMatBinary<"MAddM", int_NNPU_MAddM>;
+def MSubM : NNPUMatBinary<"MSubM", int_NNPU_MSubM>;
+def MMulM : NNPUMatBinary<"MMulM", int_NNPU_MMulM>;
+
+// matrix reduce
+def MReduceSumRow :
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr, Int32Regs:$inAddr, Int32Regs:$inStride,
+                    i32imm:$nRow, i32imm:$nCol, i32imm:$mode,
+                    i1imm:$toAcc, i1imm:$doAcc),
+               "MReduceSumRow.$nRow.$nCol.$mode.$toAcc.$doAcc $outAddr, $inAddr, $inStride",
+               [(int_NNPU_MReduceSumRow 
+                    i32:$outAddr, i32:$inAddr, i32:$inStride,
+                    imm:$nRow, imm:$nCol, imm:$mode,
+                    cond:$toAcc, cond:$doAcc)]
+          >;
+
+// matrix vector
+class NNPUMatVctr<string instrAsm, Intrinsic intrin> :
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr, Int32Regs:$outStride,
+                    Int32Regs:$in1Addr, Int32Regs:$in1Stride, Int32Regs:$in2Addr,
+                    i32imm:$nRow, i32imm:$nCol, i32imm:$mode),
+               !strconcat(instrAsm, ".$nRow.$nCol.$mode $outAddr, $outStride, $in1Addr, $in1Stride, $in2Addr"),
+               [(intrin
+                    i32:$outAddr, i32:$outStride,
+                    i32:$in1Addr, i32:$in1Stride, i32:$in2Addr,
+                    imm:$nRow, imm:$nCol, imm:$mode)]
+          >;
+
+def MAddV : NNPUMatVctr<"MAddV", int_NNPU_MAddV>;
+def MSubV : NNPUMatVctr<"MSubV", int_NNPU_MSubV>;
+def MMulV : NNPUMatVctr<"MMulV", int_NNPU_MMulV>;
+
+// matrix row dot
+def MRowDot : 
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr,
+                    Int32Regs:$in1Addr, Int32Regs:$in1Stride,
+                    Int32Regs:$in2Addr, Int32Regs:$in2Stride,
+                    i32imm:$nRow, i32imm:$nCol,
+                    i32imm:$mode, i1imm:$toAcc, i1imm:$doAcc),
+               "MRowDot.$nRow.$nCol.$mode.$toAcc.$doAcc $outAddr, $in1Addr, $in1Stride, $in2Addr, $in2Stride",
+               [(int_NNPU_MRowDot 
+                    i32:$outAddr,
+                    i32:$in1Addr, i32:$in1Stride,
+                    i32:$in2Addr, i32:$in2Stride,
+                    imm:$nRow, imm:$nCol,
+                    imm:$mode, imm:$toAcc, imm:$doAcc)]
+          >;
+
+def AccMemset :
+          NNPUTensorInst<
+               (ins Int32Regs:$addr, Int32Regs:$stride,
+                    i32imm:$nRow, i32imm:$nCol,
+                    f64imm:$val, i32imm:$mode),
+               "AccMemset.$nRow.$nCol.$mode $addr, $stride, $val",
+               [(int_NNPU_AccMemset
+                    i32:$addr, i32:$stride,
+                    imm:$nRow, imm:$nCol,
+                    fpimm:$val, imm:$mode)]
+          >;
+
+// vector-scalar
+class NNPUVctrSclr<string instrAsm, Intrinsic intrin> :
+          NNPUTensorInst<
+               (ins Int32Regs:$outAddr, Int32Regs:$in1Addr, Int32Regs:$in2Addr,
+                    i32imm:$size, i32imm:$mode),
+               !strconcat(instrAsm, ".$size.$mode $outAddr, $in1Addr, $in2Addr"),
+               [(intrin i32:$outAddr, i32:$in1Addr, i32:$in2Addr,
+                        imm:$size, imm:$mode)]
+          >;
+
+def VAddS : NNPUVctrSclr<"VAddS", int_NNPU_VAddS>;
+def VSubS : NNPUVctrSclr<"VSubS", int_NNPU_VSubS>;
+def VMulS : NNPUVctrSclr<"VMulS", int_NNPU_VMulS>;
+def VDivS : NNPUVctrSclr<"VDivS", int_NNPU_VDivS>;
+def VGTMS : NNPUVctrSclr<"VGTMS", int_NNPU_VGTMS>;
+def SSubV : NNPUVctrSclr<"SSubV", int_NNPU_SSubV>;
+def SDivV : NNPUVctrSclr<"SDivV", int_NNPU_SDivV>;
