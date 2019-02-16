@@ -2,6 +2,17 @@ class NNPUTensorInst<dag ins, string asmstr, list<dag> pattern>:
     NNPUInstBase<(outs), ins, asmstr, pattern>
 {}
 
+def FP64Imm : ComplexPattern<f64, 1, "SelectFP64Imm", [fpimm]>;
+
+def Switch : ComplexPattern<i1, 1, "SelectI1Imm", [imm]>;
+
+// load and store
+def BoolOp : Operand<i1> {
+  let PrintMethod = "printBoolOperand";
+  let MIOperandInfo = (ops i1imm);  
+  // ptr_rc is resolved dynamically via a callback to TargetInstrInfo.
+}
+
 // def Demo : NNPUTensorInst<
 //             (ins Int32Regs:$op1, Int32Regs:$op2),
 //             "demo $op1, $op2",
@@ -65,7 +76,7 @@ class NNPUVctrImm<string instrAsm, Intrinsic intrin> :
                     (ins Int32Regs:$outAddr, Int32Regs:$inAddr, f64imm:$immVal,
                          i32imm:$size, i32imm:$mode),
                     !strconcat(instrAsm, ".$size.$mode $outAddr, $inAddr, $immVal"),
-                    [(intrin i32:$outAddr, i32:$inAddr, fpimm:$immVal,
+                    [(intrin i32:$outAddr, i32:$inAddr, FP64Imm:$immVal,
                              imm:$size, imm:$mode)]
                     >;
 
@@ -83,14 +94,14 @@ def GEMM : NNPUTensorInst<
                     Int32Regs:$outAddr, Int32Regs:$outStride,
                     Int32Regs:$in1Addr, Int32Regs:$in1Stride,
                     Int32Regs:$in2Addr, Int32Regs:$in2Stride,
-                    i32imm:$mode, i1imm:$toAcc, i1imm:$doAcc),
+                    i32imm:$mode, BoolOp:$toAcc, BoolOp:$doAcc),
                "GEMM.$nRow.$factor.$nCol.$mode.$toAcc.$doAcc $outAddr, $outStride, $in1Addr, $in1Stride, $in2Addr, $in2Stride",
                [(int_NNPU_GEMM 
                     imm:$nRow, imm:$factor, imm:$nCol,
                     i32:$outAddr, i32:$outStride,
                     i32:$in1Addr, i32:$in1Stride,
                     i32:$in2Addr, i32:$in2Stride,
-                    imm:$mode, imm:$toAcc, imm:$doAcc)]>;
+                    imm:$mode, Switch:$toAcc, Switch:$doAcc)]>;
 
 // matrix-immediate insns.
 class NNPUMatImm<string instrAsm, Intrinsic intrin> : 
@@ -98,7 +109,7 @@ class NNPUMatImm<string instrAsm, Intrinsic intrin> :
                     (ins Int32Regs:$outAddr, Int32Regs:$inAddr, f64imm:$immVal,
                          i32imm:$nRow, i32imm:$nCol, i32imm:$mode),
                     !strconcat(instrAsm, ".$nRow.$nCol.$mode $outAddr, $inAddr, $immVal"),
-                    [(intrin i32:$outAddr, i32:$inAddr, fpimm:$immVal,
+                    [(intrin i32:$outAddr, i32:$inAddr, FP64Imm:$immVal,
                              imm:$nRow, imm:$nCol, imm:$mode)]
                     >;
 
@@ -136,7 +147,7 @@ def Memset :
                "Memset.$mode $addr, $nUnit, $stride, $val",
                [(int_NNPU_Memset 
                     i32:$addr, i32:$nUnit, i32:$stride,
-                    fpimm:$val, imm:$mode)]
+                    FP64Imm:$val, imm:$mode)]
           >;
 
 // vector dot product
@@ -187,12 +198,12 @@ def MReduceSumRow :
           NNPUTensorInst<
                (ins Int32Regs:$outAddr, Int32Regs:$inAddr, Int32Regs:$inStride,
                     i32imm:$nRow, i32imm:$nCol, i32imm:$mode,
-                    i1imm:$toAcc, i1imm:$doAcc),
+                    BoolOp:$toAcc, BoolOp:$doAcc),
                "MReduceSumRow.$nRow.$nCol.$mode.$toAcc.$doAcc $outAddr, $inAddr, $inStride",
                [(int_NNPU_MReduceSumRow 
                     i32:$outAddr, i32:$inAddr, i32:$inStride,
                     imm:$nRow, imm:$nCol, imm:$mode,
-                    cond:$toAcc, cond:$doAcc)]
+                    Switch:$toAcc, Switch:$doAcc)]
           >;
 
 // matrix vector
@@ -219,14 +230,14 @@ def MRowDot :
                     Int32Regs:$in1Addr, Int32Regs:$in1Stride,
                     Int32Regs:$in2Addr, Int32Regs:$in2Stride,
                     i32imm:$nRow, i32imm:$nCol,
-                    i32imm:$mode, i1imm:$toAcc, i1imm:$doAcc),
+                    i32imm:$mode, BoolOp:$toAcc, BoolOp:$doAcc),
                "MRowDot.$nRow.$nCol.$mode.$toAcc.$doAcc $outAddr, $in1Addr, $in1Stride, $in2Addr, $in2Stride",
                [(int_NNPU_MRowDot 
                     i32:$outAddr,
                     i32:$in1Addr, i32:$in1Stride,
                     i32:$in2Addr, i32:$in2Stride,
                     imm:$nRow, imm:$nCol,
-                    imm:$mode, imm:$toAcc, imm:$doAcc)]
+                    imm:$mode, Switch:$toAcc, Switch:$doAcc)]
           >;
 
 def AccMemset :
@@ -238,7 +249,7 @@ def AccMemset :
                [(int_NNPU_AccMemset
                     i32:$addr, i32:$stride,
                     imm:$nRow, imm:$nCol,
-                    fpimm:$val, imm:$mode)]
+                    FP64Imm:$val, imm:$mode)]
           >;
 
 // vector-scalar

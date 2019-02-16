@@ -87,3 +87,18 @@ unsigned NNPUInstrInfo::
 
     llvm_unreachable("conditional branch insert is not handled");
 }
+
+void NNPUInstrInfo::
+    copyPhysReg(MachineBasicBlock &MBB,
+                MachineBasicBlock::iterator MI, const DebugLoc &DL,
+                unsigned DestReg, unsigned SrcReg,
+                bool KillSrc) const
+{
+    assert(NNPU::Int32RegsRegClass.contains(DestReg) &&
+            NNPU::Int32RegsRegClass.contains(SrcReg) &&
+            ", ilegal register class to copy");
+    BuildMI(MBB, MI, DL, get(NNPU::AddIU))
+        .addReg(DestReg, RegState::Define)
+        .addReg(SrcReg, getKillRegState(KillSrc))
+        .addImm(0);
+}

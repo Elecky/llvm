@@ -71,9 +71,9 @@ public:
     // bool
     // reverseBranchCondition(SmallVectorImpl<MachineOperand> &Cond) const override;
 
-    // void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
-    //                 const DebugLoc &DL, unsigned DestReg, unsigned SrcReg,
-    //                 bool KillSrc) const override;
+    void copyPhysReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator I,
+                    const DebugLoc &DL, unsigned DestReg, unsigned SrcReg,
+                    bool KillSrc) const override;
 
     void storeRegToStackSlot(MachineBasicBlock &MBB,
                             MachineBasicBlock::iterator MBBI,

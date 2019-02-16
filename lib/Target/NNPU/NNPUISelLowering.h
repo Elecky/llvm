@@ -45,6 +45,8 @@ public:
         llvm_unreachable("vector type is not supported");
     }
 
+    bool isFPImmLegal(const APFloat &/*Imm*/, EVT /*VT*/) const override;
+
 private:
     SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
 

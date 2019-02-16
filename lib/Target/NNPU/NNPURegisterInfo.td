@@ -40,3 +40,9 @@ def Int32Regs : RegisterClass<"NNPU", [i32], 32,
 def GP32Regs : RegisterClass<"NNPU", [i32], 32,
                             (add (sequence "G%u", 3, 31))
                            >;
+
+// dummy float 64 register, it's used to cheat llvm that NNPU can handle float64 type.
+class Rf<bits<16> Enc, string n> : NNPUReg<Enc, n>;
+
+def FP0 : Rf<1, "fp0">, DwarfRegNum<[0]>;
+def FP64Regs : RegisterClass<"NNPU", [f64], 64, (add FP0)>;

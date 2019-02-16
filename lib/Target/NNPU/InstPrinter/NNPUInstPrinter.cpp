@@ -19,6 +19,8 @@
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/MCSymbol.h"
 #include "llvm/Support/raw_ostream.h"
+#include <sstream>
+#include <iostream>
 using namespace llvm;
 
 #define DEBUG_TYPE "asm-printer"
@@ -56,6 +58,16 @@ void NNPUInstPrinter::printOperand(const MCInst *MI, int opNum,
         return;
     }
 
+    if (op.isFPImm())
+    {
+        // we rely on std::stringstream to output the double value,
+        // since llvm::raw_ostream don't distinguish between positive and negative infinity.
+        std::stringstream ss;
+        ss << op.getFPImm();
+        O << ss.str();
+        return;
+    }
+
     assert(op.isExpr() && "unknown operand kind in printOperand");
 
     op.getExpr()->print(O, &MAI, true);
@@ -68,4 +80,21 @@ void NNPUInstPrinter::printMemOperand(const MCInst *MI, int opNum,
     O << '(';
     printOperand(MI, opNum, STI, O);
     O << ")";
+}
+
+void NNPUInstPrinter::printBoolOperand(const MCInst *MI, int opNum, const MCSubtargetInfo &STI,
+                        raw_ostream &OS, const char *Modifier)
+{
+    const MCOperand &op = MI->getOperand(opNum);
+
+    assert(op.isImm() && ", non-immediate operand encountered");
+    if (op.getImm() == 0)
+    {
+        OS << "F";
+    }
+    else
+    {
+        OS << "T";
+    }
+    
 }

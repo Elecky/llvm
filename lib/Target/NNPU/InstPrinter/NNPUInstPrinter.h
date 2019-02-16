@@ -48,6 +48,9 @@ private:
 
     void printMemOperand(const MCInst *MI, int opNum, const MCSubtargetInfo &STI,
                         raw_ostream &OS, const char *Modifier = nullptr);
+
+    void printBoolOperand(const MCInst *MI, int opNum, const MCSubtargetInfo &STI,
+                        raw_ostream &OS, const char *Modifier = nullptr);
 };
 } // end namespace llvm
 

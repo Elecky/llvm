@@ -24,6 +24,7 @@
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCSymbol.h"
+#include <iostream>
 
 using namespace llvm;
 
@@ -71,16 +72,19 @@ static MCOperand LowerOperand(const MachineInstr *MI,
                               AsmPrinter &AP) {
     switch(MO.getType()) 
     {
-    default: 
-        llvm_unreachable("unknown operand type"); 
-
     case MachineOperand::MO_Register:
         if (MO.isImplicit())
             break;
         return MCOperand::createReg(MO.getReg());
 
     case MachineOperand::MO_Immediate:
-       return MCOperand::createImm(MO.getImm());
+        return MCOperand::createImm(MO.getImm());
+    
+    case MachineOperand::MO_FPImmediate:
+    {
+        auto val = MO.getFPImm()->getValueAPF();
+        return MCOperand::createFPImm(val.convertToDouble());
+    }
 
     case MachineOperand::MO_MachineBasicBlock:
     case MachineOperand::MO_GlobalAddress:
@@ -91,6 +95,9 @@ static MCOperand LowerOperand(const MachineInstr *MI,
 
     case MachineOperand::MO_RegisterMask:   break;
 
+    default: 
+        llvm_unreachable("unknown operand type");
+        break;
     }
     
     return MCOperand();

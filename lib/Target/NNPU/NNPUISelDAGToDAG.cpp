@@ -5,6 +5,7 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
+#include <iostream>
 using namespace llvm;
 
 //===----------------------------------------------------------------------===//
@@ -34,6 +35,10 @@ public:
 
     // Complex Pattern Selectors.
     bool SelectADDRri(SDValue N, SDValue &Base, SDValue &Offset);
+
+    bool SelectFP64Imm(SDValue N, SDValue &imm);
+
+    bool SelectI1Imm(SDValue N, SDValue &imm);
 
     /// SelectInlineAsmMemoryOperand - Implement addressing mode selection for
     /// inline asm expressions.
@@ -98,6 +103,33 @@ bool NNPUDAGToDAGISel::SelectADDRri(SDValue Addr, SDValue &Base, SDValue &Offset
     Base = Addr;
     Offset = CurDAG->getTargetConstant(0, SDLoc(Addr), MVT::i32);
     return true;
+}
+
+bool NNPUDAGToDAGISel::SelectFP64Imm(SDValue N, SDValue &imm) {
+    if (ConstantFPSDNode *val = dyn_cast<ConstantFPSDNode>(N)) {
+        imm = CurDAG->getTargetConstantFP(val->getValueAPF(), 
+                        SDLoc(N), MVT::f64);
+        return true;
+    }
+    else {
+        llvm_unreachable("not constant fp64 operand");
+        return false;
+    }
+}
+
+bool NNPUDAGToDAGISel::SelectI1Imm(SDValue N, SDValue &imm)
+{
+    if (ConstantSDNode *val = dyn_cast<ConstantSDNode>(N)) {
+        assert(val->getAPIntValue().isIntN(1) && ", not i1");
+        imm = CurDAG->getTargetConstant(val->getAPIntValue().getZExtValue(),
+                SDLoc(N), MVT::i1);        
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+    
 }
 
 void NNPUDAGToDAGISel::Select(SDNode *Node)

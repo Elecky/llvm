@@ -16,6 +16,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/KnownBits.h"
+#include <iostream>
 using namespace llvm;
 
 namespace llvm
@@ -29,13 +30,20 @@ NNPUTargetLowering::NNPUTargetLowering(const TargetMachine &TM,
 
     // addRegisterClass(MVT::i1, &NNPU::Int32RegsRegClass);
     addRegisterClass(MVT::i32, &NNPU::Int32RegsRegClass);
+    // NOTE: here we cheat LLVM DAG legalizer that we have f64 registers,
+    //  otherwise, it will soften f64 operations.
+    addRegisterClass(MVT::f64, &NNPU::FP64RegsRegClass);
 
     computeRegisterProperties(Subtarget->getRegisterInfo());
 
     setOperationAction(ISD::GlobalAddress, PtrVT, Custom);
 
     // intrinsic handling
-    // setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
+    setOperationAction(ISD::INTRINSIC_VOID, MVT::f64, Legal);
+    setOperationAction(ISD::INTRINSIC_VOID, MVT::i1, Custom);
+    // NOTE: here we set f64 constant operation as legal. 
+    //  it defaults to expand, which means a load will be generated.
+    setOperationAction(ISD::ConstantFP, MVT::f64, Legal);
 
     setOperationAction(ISD::SELECT_CC, MVT::i32, Expand);
     //setOperationAction(ISD::SELECT, MVT::i32, Expand);
@@ -169,12 +177,57 @@ SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) c
     unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
     SDLoc dl(Op);
 
-    switch (IntNo) 
+    assert(Op.getSimpleValueType() == MVT::Other);
+
+    // TODO: add check to only custom lowering NNPU intrinsics
+    if (Intrinsic::getName(Intrinsic::ID(IntNo)).startswith("llvm.NNPU."))
     {
-    
-    default: return SDValue();    // Don't custom lower most intrinsics.
-    
+        SmallVector<SDValue, 8> ops;
+        // copy in-chain and intrinsic ID operands.
+        ops.push_back(Op.getOperand(0));
+        ops.push_back(Op.getOperand(1));
+        for (unsigned i = 2; i < Op.getNumOperands(); ++i)
+        {
+            SDValue opnd = Op.getOperand(i);
+            SDValue res;
+            EVT vt = opnd.getSimpleValueType();
+            if (vt == MVT::i1)
+            {
+                if (ConstantSDNode *imm = dyn_cast<ConstantSDNode>(opnd))
+                {
+                    // std::cout << "creating new imm\n";
+                    res = DAG.getConstant(imm->getAPIntValue().getZExtValue(), SDLoc(opnd), 
+                                MVT::i32);
+                }
+                else
+                {
+                    llvm_unreachable("NNPU intrinsic function can't only accept i1 "
+                            "none-immediate operands");
+                }
+            }
+            else if (vt == MVT::i32 || vt == MVT::f64)
+            {
+                res = opnd;
+            }
+            else
+            {
+                llvm_unreachable("ilegal operand type for NNPU intrinsic function");
+            }
+            
+            ops.push_back(res);
+        }
+        return DAG.getNode(ISD::INTRINSIC_VOID, SDLoc(Op), 
+                    Op.getValueType(), ArrayRef<SDValue>(ops));
     }
+    else
+    {
+        return SDValue();
+    }
+    
+}
+
+bool NNPUTargetLowering::isFPImmLegal(const APFloat &/*Imm*/, EVT /*VT*/) const {
+    return true;
 }
 
 }  // end namespace llvm
