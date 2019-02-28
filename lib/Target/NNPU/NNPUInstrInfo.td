@@ -34,11 +34,6 @@ def NNPURet : SDNode<"NNPUISD::Ret", SDTNone,
 def : Pat<(i32 imm:$val),
           (AddIU Zero, imm:$val)>;
 
-// def : Pat<(NNPUMOAbsAll tglobaladdr:$in), 
-//           (AddIU Zero, tglobaladdr:$in)>;
-def : Pat<(i32 (sext i1:$val)),
-          (AddIU $val, -1)>;
-
 // sign extend 
 def : Pat<(i32 (select i32:$cond, -1, 0)),
           (AddIU (XORI $cond, 1), -1)>;
@@ -113,6 +108,7 @@ def Jump : NNPUInst<(outs), (ins brtarget:$target),
 {
     let isBranch = 1;
     let isTerminator = 1;
+    let isBarrier = 1;
     // let isCodeGenOnly = 1;
 }
 
@@ -122,6 +118,7 @@ def BNEZ : NNPUInst<(outs), (ins Int32Regs:$Rs, brtarget:$target),
 {
     let isBranch = 1;
     let isTerminator = 1;
+    let isPredicable = 1;
     // let isCodeGenOnly = 1;
 }
 
@@ -131,6 +128,7 @@ def BEZ : NNPUInst<(outs), (ins Int32Regs:$Rs, brtarget:$target),
 {
     let isBranch = 1;
     let isTerminator = 1;
+    let isPredicable = 1;
     // let isCodeGenOnly = 1;
 }
 
@@ -146,7 +144,9 @@ def RetRA: NNPUInst<(outs), (ins),
 {
     let isReturn = 1;
     let isTerminator = 1;
-    let isCodeGenOnly = 1;
+    let isBarrier = 1;
+    let hasCtrlDep = 1;
+    // let isCodeGenOnly = 1;
     //let isPseudo = 1;
 }
 

@@ -102,3 +102,14 @@ void NNPUInstrInfo::
         .addReg(SrcReg, getKillRegState(KillSrc))
         .addImm(0);
 }
+
+#undef NDEBUG
+
+bool NNPUInstrInfo::analyzeBranch(
+        MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+        MachineBasicBlock *&FBB,
+        SmallVectorImpl<MachineOperand> &Cond,
+        bool AllowModify) const
+{
+    return true;  // not branch analysis
+}

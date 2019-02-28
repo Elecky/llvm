@@ -52,13 +52,10 @@ public:
     //unsigned isStoreToStackSlot(const MachineInstr &MI,
     //                            int &FrameIndex) const override;
 
-    // bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
-    //                    MachineBasicBlock *&FBB,
-    //                    SmallVectorImpl<MachineOperand> &Cond,
-    //                    bool AllowModify = false) const override
-    // {
-    //     return true;  // not branch analysis
-    // }
+    bool analyzeBranch(MachineBasicBlock &MBB, MachineBasicBlock *&TBB,
+                       MachineBasicBlock *&FBB,
+                       SmallVectorImpl<MachineOperand> &Cond,
+                       bool AllowModify = false) const override;
 
     //unsigned removeBranch(MachineBasicBlock &MBB,
     //                        int *BytesRemoved = nullptr) const override;
