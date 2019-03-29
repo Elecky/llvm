@@ -87,7 +87,7 @@ let ParamTypes = [llvm_i32_ty, llvm_i32_ty, llvm_double_ty, llvm_i32_ty,
 // ScratchpadCopy
 def int_NNPU_ScratchpadCopy : int_NNPU_void_6op<"ScratchpadCopy">;
 // CopyAccToBuffer
-def int_NNPU_CopyAccToBuffer : int_NNPU_void_6op<"CopyAccToBuffer">;
+def int_NNPU_CopyAccToBuffer : int_NNPU_void_4op<"CopyAccToBuffer">;
 
 // memset.
 def int_NNPU_Memset : 

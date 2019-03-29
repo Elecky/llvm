@@ -129,16 +129,14 @@ def ScratchpadCopy :
                     i32:$srcAddr, i32:$srcStride,
                     imm:$unitBytes, i32:$nUnit)]>;
 
-def CopyAccToBuffer : 
+def CopyAccToBuffer :
           NNPUTensorInst<
-               (ins Int32Regs:$dstAddr, Int32Regs:$dstStride,
-                    Int32Regs:$srcAddr, Int32Regs:$srcStride,
-                    i32imm:$unitBytes, Int32Regs:$nUnit),
-               "CopyAccToBuffer.$unitBytes $dstAddr, $dstStride, $srcAddr, $srcStride, $nUnit",
+               (ins Int32Regs:$dstAddr, Int32Regs:$srcAddr,
+                    Int32Regs:$nUnit, i32imm:$mode),
+               "CopyAccToBuffer.$mode $dstAddr, $srcAddr, $nUnit",
                [(int_NNPU_CopyAccToBuffer 
-                    i32:$dstAddr, i32:$dstStride,
-                    i32:$srcAddr, i32:$srcStride,
-                    imm:$unitBytes, i32:$nUnit)]>;
+                    i32:$dstAddr, i32:$srcAddr,
+                    i32:$nUnit, imm:$mode)]>;
 
 def Memset :
           NNPUTensorInst<
