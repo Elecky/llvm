@@ -43,6 +43,9 @@ class int_NNPU_void_6op<string name> :
 def int_NNPU_DMALoad : int_NNPU_void_4op<"DMALoad">;
 def int_NNPU_DMAStore : int_NNPU_void_4op<"DMAStore">;
 
+def int_NNPU_DMABufLoad : int_NNPU_void_4op<"DMABufLoad">;
+def int_NNPU_DMABufStore : int_NNPU_void_4op<"DMABufStore">;
+
 def int_NNPU_ScratchpadLoad : int_NNPU_void_3op<"ScratchpadLoad">;
 def int_NNPU_ScratchpadStore : int_NNPU_void_3op<"ScratchpadStore">;
 

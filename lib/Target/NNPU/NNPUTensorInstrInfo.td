@@ -31,6 +31,20 @@ def DMAStore : NNPUTensorInst<
                 [(int_NNPU_DMAStore i32:$phyAddr, i32:$phyOffset,
                                    i32:$dramAddr, i32:$size)]>;
 
+def DMABufLoad : NNPUTensorInst<
+                (ins Int32Regs:$phyAddr, Int32Regs:$phyOffset, 
+                     Int32Regs:$dramAddr, Int32Regs:$size),
+                "DMABufLoad $phyAddr, $phyOffset, $dramAddr, $size",
+                [(int_NNPU_DMABufLoad i32:$phyAddr, i32:$phyOffset,
+                                   i32:$dramAddr, i32:$size)]>;
+
+def DMABufStore : NNPUTensorInst<
+                (ins Int32Regs:$phyAddr, Int32Regs:$phyOffset, 
+                     Int32Regs:$dramAddr, Int32Regs:$size),
+                "DMABufStore $phyAddr, $phyOffset, $dramAddr, $size",
+                [(int_NNPU_DMABufStore i32:$phyAddr, i32:$phyOffset,
+                                   i32:$dramAddr, i32:$size)]>;
+
 def ScratchpadLoad : NNPUTensorInst<
                 (ins Int32Regs:$dramAddr, Int32Regs:$bufAddr, Int32Regs:$size),
                 "ScratchpadLoad $dramAddr, $bufAddr, $size",
