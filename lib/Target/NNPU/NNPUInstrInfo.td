@@ -31,6 +31,9 @@ def NNPURet : SDNode<"NNPUISD::Ret", SDTNone,
                      [SDNPHasChain, SDNPOptInGlue]>;
 
 // immediates.
+def : Pat<(i32 0),
+          (i32 Zero)>;
+
 def : Pat<(i32 imm:$val),
           (AddIU Zero, imm:$val)>;
 
@@ -159,5 +162,12 @@ def RetRA: NNPUInst<(outs), (ins),
 //     let hasCtrlDep = 1;
 // }
 /**/
+
+// def GetCoreIdx:
+//     NNPUInst<(outs Int32Regs:$Rd), (ins),
+//              "GetCoreIdx $Rd",
+//              [(set i32:$Rd, (int_NNPU_GetCoreIdx))]>;
+
+def : Pat<(int_NNPU_GetCoreIdx), (i32 CoreIdx)>;
 
 include "NNPUTensorInstrInfo.td"

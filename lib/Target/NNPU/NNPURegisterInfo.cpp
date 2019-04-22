@@ -35,7 +35,7 @@ ReserveAppRegisters("NNPU-reserve-app-registers", cl::Hidden, cl::init(false),
                     cl::desc("Reserve application registers (%g2-%g4)"));
 */
 
-NNPURegisterInfo::NNPURegisterInfo() : NNPUGenRegisterInfo(NNPU::G3) {}
+NNPURegisterInfo::NNPURegisterInfo() : NNPUGenRegisterInfo(NNPU::G4) {}
 
 const MCPhysReg *
 NNPURegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {

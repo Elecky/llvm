@@ -18,7 +18,7 @@ class int_NNPU_void<list<LLVMType> para_types, string name>:
             Intrinsic<
                 [], 
                 para_types,
-                [],
+                [IntrInaccessibleMemOnly],
                 !strconcat("llvm.NNPU.", name),
                 [SDNPHasChain, SDNPSideEffect]>;
 
@@ -149,3 +149,14 @@ def int_NNPU_VDivS : int_NNPU_void_5op<"VDivS">;
 def int_NNPU_VGTMS : int_NNPU_void_5op<"VGTMS">;
 def int_NNPU_SSubV : int_NNPU_void_5op<"SSubV">;
 def int_NNPU_SDivV : int_NNPU_void_5op<"SDivV">;
+
+def int_NNPU_GetCoreIdx : 
+        Intrinsic<
+                [llvm_i32_ty], // return i32 type
+                [],  // no parameter
+                [IntrNoMem],
+                !strconcat("llvm.NNPU.", "GetCoreIdx"),
+                []>
+{
+    let TargetPrefix = "NNPU";
+}

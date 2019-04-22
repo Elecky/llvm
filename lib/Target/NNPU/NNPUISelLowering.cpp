@@ -41,12 +41,13 @@ NNPUTargetLowering::NNPUTargetLowering(const TargetMachine &TM,
     // intrinsic handling
     setOperationAction(ISD::INTRINSIC_VOID, MVT::f64, Legal);
     setOperationAction(ISD::INTRINSIC_VOID, MVT::i1, Custom);
+    setOperationAction(ISD::INTRINSIC_WO_CHAIN, MVT::i32, Custom);
+
     // NOTE: here we set f64 constant operation as legal. 
     //  it defaults to expand, which means a load will be generated.
     setOperationAction(ISD::ConstantFP, MVT::f64, Legal);
 
     setOperationAction(ISD::SELECT_CC, MVT::i32, Expand);
-    //setOperationAction(ISD::SELECT, MVT::i32, Expand);
     setOperationAction(ISD::BR_CC, MVT::i32, Expand);
 
     // define promotes.
@@ -72,6 +73,9 @@ SDValue NNPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const
 
     case ISD::INTRINSIC_VOID:
         return lowerIntrinsic_Void(Op, DAG);
+
+    case ISD::INTRINSIC_WO_CHAIN:
+        return lowerIntrinsic_WO_chain(Op, DAG);
 
     default: 
         llvm_unreachable("unhandled op code in lower operation");
@@ -171,8 +175,7 @@ SDValue NNPUTargetLowering::lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) co
     return DAG.getNode(ISD::ADD, DL, Ty, zero, addr);
 }
 
-SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) const
-{
+SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) const {
     // SDValue inChain = Op.getOperand(0);
     unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(1))->getZExtValue();
     SDLoc dl(Op);
@@ -180,37 +183,30 @@ SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) c
     assert(Op.getSimpleValueType() == MVT::Other);
 
     // TODO: add check to only custom lowering NNPU intrinsics
-    if (Intrinsic::getName(Intrinsic::ID(IntNo)).startswith("llvm.NNPU."))
-    {
+    if (Intrinsic::getName(Intrinsic::ID(IntNo)).startswith("llvm.NNPU.")) {
         SmallVector<SDValue, 8> ops;
         // copy in-chain and intrinsic ID operands.
         ops.push_back(Op.getOperand(0));
         ops.push_back(Op.getOperand(1));
-        for (unsigned i = 2; i < Op.getNumOperands(); ++i)
-        {
+        for (unsigned i = 2; i < Op.getNumOperands(); ++i) {
             SDValue opnd = Op.getOperand(i);
             SDValue res;
             EVT vt = opnd.getSimpleValueType();
-            if (vt == MVT::i1)
-            {
-                if (ConstantSDNode *imm = dyn_cast<ConstantSDNode>(opnd))
-                {
+            if (vt == MVT::i1) {
+                if (ConstantSDNode *imm = dyn_cast<ConstantSDNode>(opnd)) {
                     // std::cout << "creating new imm\n";
                     res = DAG.getConstant(imm->getAPIntValue().getZExtValue(), SDLoc(opnd), 
                                 MVT::i32);
                 }
-                else
-                {
-                    llvm_unreachable("NNPU intrinsic function can't only accept i1 "
+                else {
+                    llvm_unreachable("NNPU intrinsic function can't accept i1 "
                             "none-immediate operands");
                 }
             }
-            else if (vt == MVT::i32 || vt == MVT::f64)
-            {
+            else if (vt == MVT::i32 || vt == MVT::f64) {
                 res = opnd;
             }
-            else
-            {
+            else {
                 llvm_unreachable("ilegal operand type for NNPU intrinsic function");
             }
             
@@ -219,11 +215,24 @@ SDValue NNPUTargetLowering::lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) c
         return DAG.getNode(ISD::INTRINSIC_VOID, SDLoc(Op), 
                     Op.getValueType(), ArrayRef<SDValue>(ops));
     }
-    else
-    {
+    else {
         return SDValue();
     }
     
+}
+
+SDValue NNPUTargetLowering::lowerIntrinsic_WO_chain(SDValue Op, SelectionDAG &DAG) const {
+    std::cerr << "lowerIntrinsic_WO_chain called\n";
+    unsigned IntNo = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
+    SDLoc dl(Op);
+
+    switch (IntNo) {
+    default:
+        return SDValue();
+
+    case Intrinsic::NNPU_GetCoreIdx:
+        return DAG.getRegister(NNPU::CoreIdx, MVT::i32);
+    }
 }
 
 bool NNPUTargetLowering::isFPImmLegal(const APFloat &/*Imm*/, EVT /*VT*/) const {

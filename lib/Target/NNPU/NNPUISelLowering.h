@@ -51,6 +51,8 @@ private:
     SDValue lowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
 
     SDValue lowerIntrinsic_Void(SDValue Op, SelectionDAG &DAG) const;
+
+    SDValue lowerIntrinsic_WO_chain(SDValue Op, SelectionDAG &DAG) const;
 };
 
 } // end namespace llvm

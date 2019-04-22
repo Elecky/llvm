@@ -11,5 +11,5 @@ def RetCC_NNPU : CallingConv<[
 // NNPU has no function call actually, 
 // so we pretend that every register is preserved for both caller and callee.
 def CSR : CalleeSavedRegs<(add)> {
-  let OtherPreserved = (add (sequence "G%u", 3, 31));
+  let OtherPreserved = (add (sequence "G%u", 4, 31));
 }

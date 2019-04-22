@@ -48,7 +48,7 @@ static MCInstrInfo *createNNPUMCInstrInfo() {
 
 static MCRegisterInfo *createNNPUMCRegisterInfo(const Triple &TT) {
     MCRegisterInfo *X = new MCRegisterInfo();
-    InitNNPUMCRegisterInfo(X, NNPU::G3);
+    InitNNPUMCRegisterInfo(X, NNPU::G4);
     return X;
 }
 
