@@ -150,6 +150,9 @@ def int_NNPU_VGTMS : int_NNPU_void_5op<"VGTMS">;
 def int_NNPU_SSubV : int_NNPU_void_5op<"SSubV">;
 def int_NNPU_SDivV : int_NNPU_void_5op<"SDivV">;
 
+def int_NNPU_DependPush : int_NNPU_void<[llvm_i32_ty, llvm_i32_ty], "DependPush">;
+def int_NNPU_DependPop : int_NNPU_void<[llvm_i32_ty, llvm_i32_ty], "DependPop">;
+
 def int_NNPU_GetCoreIdx : 
         Intrinsic<
                 [llvm_i32_ty], // return i32 type

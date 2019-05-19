@@ -281,3 +281,13 @@ def VDivS : NNPUVctrSclr<"VDivS", int_NNPU_VDivS>;
 def VGTMS : NNPUVctrSclr<"VGTMS", int_NNPU_VGTMS>;
 def SSubV : NNPUVctrSclr<"SSubV", int_NNPU_SSubV>;
 def SDivV : NNPUVctrSclr<"SDivV", int_NNPU_SDivV>;
+
+def DependPush : 
+     NNPUTensorInst<(ins i32imm:$from, i32imm:$to),
+                    "DependPush $from, $to",
+                    [(int_NNPU_DependPush imm:$from, imm:$to)]>;
+
+def DependPop : 
+     NNPUTensorInst<(ins i32imm:$from, i32imm:$to),
+                    "DependPop $from, $to",
+                    [(int_NNPU_DependPop imm:$from, imm:$to)]>;
