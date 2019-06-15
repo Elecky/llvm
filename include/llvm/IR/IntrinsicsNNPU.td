@@ -38,6 +38,12 @@ class int_NNPU_void_6op<string name> :
             int_NNPU_void<[llvm_i32_ty, llvm_i32_ty, llvm_i32_ty, 
                            llvm_i32_ty, llvm_i32_ty, llvm_i32_ty],
                           name>;
+
+/* a class of NNPU intrin that returns int32 as result. which access scratchpad memory, but has no side-effect! */
+class int_NNPU_int32<list<LLVMType> para_types, string name>:
+        Intrinsic<[llvm_i32_ty], para_types, [IntrInaccessibleMemOnly], 
+                    !strconcat("llvm.NNPU.", name), [SDNPHasChain]>;
+
 }
 
 def int_NNPU_DMALoad : int_NNPU_void_4op<"DMALoad">;
@@ -153,6 +159,11 @@ def int_NNPU_SDivV : int_NNPU_void_5op<"SDivV">;
 def int_NNPU_DependPush : int_NNPU_void<[llvm_i32_ty, llvm_i32_ty], "DependPush">;
 def int_NNPU_DependPop : int_NNPU_void<[llvm_i32_ty, llvm_i32_ty], "DependPop">;
 
+/* set a pipeline local register. arguments: PID, RegNo, Value */
+def int_NNPU_SetPipelineReg : int_NNPU_void_3op<"SetPipelineReg">;
+/* launch a micro-kernel on a pipeline. arguments: PID, KernelID, Loop0Ext, Loop1Ext */
+def int_NNPU_LaunchMicroKernel : int_NNPU_void_4op<"LaunchMicroKernel">;
+
 def int_NNPU_GetCoreIdx : 
         Intrinsic<
                 [llvm_i32_ty], // return i32 type
@@ -163,3 +174,7 @@ def int_NNPU_GetCoreIdx :
 {
     let TargetPrefix = "NNPU";
 }
+
+/* indicates loading a number from scratchpad buffer and converts to int32, then write it to register. */
+def int_NNPU_MoveFromBuf :
+        int_NNPU_int32<[llvm_i32_ty, llvm_i32_ty], "MoveFromBuf">;
