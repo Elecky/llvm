@@ -291,3 +291,13 @@ def DependPop :
      NNPUTensorInst<(ins i32imm:$from, i32imm:$to),
                     "DependPop $from, $to",
                     [(int_NNPU_DependPop imm:$from, imm:$to)]>;
+
+def SetPipelineReg :
+     NNPUTensorInst<(ins i32imm:$pid, i32imm:$regno, Int32Regs:$value),
+                    "SetPipelineReg $pid, $regno, $value",
+                    [(int_NNPU_SetPipelineReg imm:$pid, imm:$regno, i32:$value)]>;
+
+def LaunchMicroKernel :
+     NNPUTensorInst<(ins i32imm:$pid, i32imm:$kid, Int32Regs:$ext0, Int32Regs:$ext1),
+                    "LaunchMicroKernel $pid, $kid, $ext0, $ext1",
+                    [(int_NNPU_LaunchMicroKernel imm:$pid, imm:$kid, i32:$ext0, i32:$ext1)]>;

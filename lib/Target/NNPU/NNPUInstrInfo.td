@@ -4,20 +4,22 @@ include "NNPUInstrFormats.td"
 def AddU: FRR<add, "AddU">;
 def SubU: FRR<sub, "SubU">;
 def MulU: FRR<mul, "MulU">;
-def DivU: FRR<udiv, "DivU">;
-def ModU: FRR<urem, "ModU">;
+def Div: FRR<sdiv, "Div">;
+def Mod: FRR<srem, "Mod">;
 def SLTU: FSetRR<setult, "SLTU">;
 def SLT: FSetRR<setlt, "SLT">;
 def SEQ: FSetRR<seteq, "SEQ">;
 def XOR: FRR<xor, "XOR">;
 def And: FRR<and, "And">;
 def Or: FRR<or, "Or">;
+def Max: FRR<smax, "Max">;
+def Min: FRR<smin, "Min">;
 
 // unary ALU instrs
 def AddIU: FRI<add, "AddIU">;
 def MulIU: FRI<mul, "MulIU">;
-def DivIU: FRI<udiv, "DivIU">;
-def ModIU: FRI<urem, "ModIU">;
+def DivI: FRI<sdiv, "DivI">;
+def ModI: FRI<srem, "ModI">;
 def SLTIU: FSetRI<setult, "SLTIU">;
 def SLTI: FSetRI<setlt, "SLTI">;
 def SEQI: FSetRI<seteq, "SEQI">;
@@ -25,6 +27,7 @@ def XORI: FRI<xor, "XORI">;
 def AndI: FRI<and, "AndI">;
 def OrI: FRI<or, "OrI">;
 def SHLI: FRI<shl, "SHLI">;
+def SRLI: FRI<srl, "SRLI">;
 
 // some user-defined SDNodes.
 def NNPURet : SDNode<"NNPUISD::Ret", SDTNone,
@@ -73,6 +76,12 @@ def : Pat<(i32 (setge i32:$Rs, imm:$val)),
 
 // def : Pat<(), 
 //           ()>;
+
+// patterns for max and min
+def : Pat<(i32 (select (setlt i32:$Rs, i32:$Rt), i32:$Rs, i32:$Rt)),
+          (Min $Rs, $Rt)>;
+def : Pat<(i32 (select (setgt i32:$Rs, i32:$Rt), i32:$Rs, i32:$Rt)),
+          (Max $Rs, $Rt)>;
 
 // load and store
 def MEMri : Operand<iPTR> {
@@ -169,5 +178,11 @@ def RetRA: NNPUInst<(outs), (ins),
 //              [(set i32:$Rd, (int_NNPU_GetCoreIdx))]>;
 
 def : Pat<(int_NNPU_GetCoreIdx), (i32 CoreIdx)>;
+
+def MoveFromBuf : NNPUInstBase<
+        (outs Int32Regs:$Rd),
+        (ins Int32Regs:$Rs, i32imm:$mode),
+        "MoveFromBuf $Rd, $Rs, $mode",
+        [(set i32:$Rd, (int_NNPU_MoveFromBuf i32:$Rs, imm:$mode))]>;
 
 include "NNPUTensorInstrInfo.td"
